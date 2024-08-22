@@ -22,7 +22,7 @@ func main() {
 
 	for i := 0; i < numOfThreads; i++ {
 		wg.Add(1)
-		// crawl website
+		go Crawl(&wg, sitesChannel, crawledLinksChannel, pendingSitesChannel)
 	}
 
 	wg.Wait()

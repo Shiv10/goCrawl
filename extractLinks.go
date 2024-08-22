@@ -9,7 +9,7 @@ import (
 	"golang.org/x/net/html"
 )
 
-func extractLink(website string) {
+func extractLink(website string, crawledLinksChannel chan string) {
 
 	response, err := http.Get(website)
 
@@ -30,13 +30,19 @@ func extractLink(website string) {
 		token := tokenizer.Token()
 		re := regexp.MustCompile(`href=".+"`)
 		if tokenType == html.StartTagToken && token.Data == "a" {
-			link := string(re.Find([]byte(token.String())))[6:]
+			link := string(re.Find([]byte(token.String())))
+			if len(link) < 7 {
+				continue
+			}
+			link = link[6:]
 			index := strings.Index(link, "\"")
 			link = link[0:index]
 			if !strings.HasPrefix(link, "http") {
 				continue
 			}
-			fmt.Println(link)
+			go func() {
+				crawledLinksChannel <- link
+			}()
 		}
 	}
 }
